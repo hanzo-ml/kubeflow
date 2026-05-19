@@ -1,62 +1,95 @@
-# Kubeflow
+# Notebooks + Profiles
 
-[![Join Kubeflow Slack](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels)
-[![CLOMonitor](https://img.shields.io/endpoint?url=https://clomonitor.io/api/projects/cncf/kubeflow/badge)](https://clomonitor.io/projects/cncf/kubeflow)
+Per-tenant Jupyter and dev environments + profile management on Kubernetes.
 
-<img src="./logo/stacked.svg" width="120">
+A brand-neutral fork in the [hanzo-ml](https://github.com/hanzo-ml)
+organization — the open-source ML lifecycle estate. Branding is
+consumed at runtime from a brand package via the
+[`@<org>/brand`](#brand-package) contract; the same code deploys under
+any white-label brand with zero source changes.
 
-## What is Kubeflow
+## Brand package
 
-[Kubeflow](https://www.kubeflow.org/) is the foundation of tools for AI Platforms on Kubernetes.
+This fork imports brand configuration from a runtime brand package
+following the contract used across the open-source ML estate. Set
+`BRAND_PACKAGE` to the npm package name; the fork's frontend (where
+applicable) calls `loadBrand()` at boot to hydrate the singleton from
+that package's `brand.json`.
 
-AI platform teams can build on top of Kubeflow by using each project independently or deploying the
-entire AI reference platform to meet their specific needs. The Kubeflow AI reference platform is
-composable, modular, portable, and scalable, backed by an ecosystem of Kubernetes-native
-projects that cover every stage of the [AI lifecycle](https://www.kubeflow.org/docs/started/architecture/#kubeflow-projects-in-the-ai-lifecycle).
+Available brand packages:
 
-Whether you’re an AI practitioner, a platform administrator, or a team of developers, Kubeflow
-offers modular, scalable, and extensible tools to support your AI use cases.
+| Package | Brand |
+|---|---|
+| `@hanzo/brand` | default / Hanzo AI |
+| `@luxfi/brand` | Lux Finance |
+| `@zooai/brand` | Zoo Labs |
+| `@osage/brand` | Osage |
+| `@parsdao/brand` | Pars DAO |
+| `@cyrusdao/brand` | Cyrus DAO |
+| `@onyx-plus/brand` | Onyx Plus |
+| `@migaprotocol/brand` | Miga Protocol |
+| `@vccross/brand` | VC Cross |
+| `@mlc/brand` | MLC |
+| `@zenlm/brand` | Zen LM |
 
-Please refer to [the official documentation](https://www.kubeflow.org/docs/) for more information.
+Or any custom reseller package conforming to the same schema.
 
-## What are Kubeflow Projects
+## Multi-tenant via IAM
 
-Kubeflow is composed of multiple open source projects that address different aspects
-of the AI lifecycle. These projects are designed to be usable both independently and as part of the
-Kubeflow AI reference platform. This provides flexibility for users who may not need the full
-end-to-end AI platform capabilities but want to leverage specific functionalities, such as model
-training or model serving.
+Every request carries a JWT. The brand package's `iam` block specifies:
 
-| Kubeflow Project                                                                    | Source Code                                                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [KServe](https://www.kubeflow.org/docs/external-add-ons/kserve/)                    | [`kserve/kserve`](https://github.com/kserve/kserve)                     |
-| [Kubeflow Katib](https://www.kubeflow.org/docs/components/katib/)                   | [`kubeflow/katib`](https://github.com/kubeflow/katib)                   |
-| [Kubeflow Model Registry](https://www.kubeflow.org/docs/components/model-registry/) | [`kubeflow/model-registry`](https://github.com/kubeflow/model-registry) |
-| [Kubeflow Notebooks](https://www.kubeflow.org/docs/components/notebooks/)           | [`kubeflow/notebooks`](https://github.com/kubeflow/notebooks)           |
-| [Kubeflow Pipelines](https://www.kubeflow.org/docs/components/pipelines/)           | [`kubeflow/pipelines`](https://github.com/kubeflow/pipelines)           |
-| [Kubeflow SDK](https://github.com/kubeflow/sdk)                                     | [`kubeflow/sdk`](https://github.com/kubeflow/sdk)                       |
-| [Kubeflow Spark Operator](https://www.kubeflow.org/docs/components/spark-operator/) | [`kubeflow/spark-operator`](https://github.com/kubeflow/spark-operator) |
-| [Kubeflow Trainer](https://www.kubeflow.org/docs/components/trainer/)               | [`kubeflow/trainer`](https://github.com/kubeflow/trainer)               |
+- `issuer` — JWT issuer URL
+- `jwksUrl` — JWKS endpoint
+- `tenantClaim` — JWT claim with the org/tenant ID (default `org_id`)
+- `tenantHeader` — HTTP header that propagates the validated tenant
+  ID (default `X-Org-Id`)
 
-## What is the Kubeflow AI Reference Platform
+The tenant ID scopes all storage, queries, and resource ownership.
+Cross-tenant access is forbidden by default.
 
-The Kubeflow AI reference platform refers to the full suite of Kubeflow projects bundled together
-with additional integration and management tools. Kubeflow AI reference platform deploys the
-comprehensive toolkit for the entire AI lifecycle. The Kubeflow AI reference platform can be
-installed via [Packaged Distributions](https://www.kubeflow.org/docs/started/installing-kubeflow/#packaged-distributions)
-or [Kubeflow Manifests](https://www.kubeflow.org/docs/started/installing-kubeflow/#kubeflow-manifests).
+## Quick start (reseller deployment)
 
-| Kubeflow AI Reference Platform Tool                                                                 | Source Code                                                   |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| [Central Dashboard](https://www.kubeflow.org/docs/components/central-dash/)                         | [`kubeflow/dashboard`](https://github.com/kubeflow/dashboard) |
-| [Profile Controller](https://www.kubeflow.org/docs/components/central-dash/profiles/)               | [`kubeflow/dashboard`](https://github.com/kubeflow/dashboard) |
-| [Kubeflow Manifests](https://www.kubeflow.org/docs/started/installing-kubeflow/#kubeflow-manifests) | [`kubeflow/manifests`](https://github.com/kubeflow/manifests) |
+```bash
+export BRAND_PACKAGE="@<your-org>/brand"   # e.g. @luxfi/brand
+```
 
-## Kubeflow Community
+The frontend (this fork's case: `pipelines` ships the React DAG UI;
+the other 7 are read-only reference forks) loads the brand at boot.
+The backend reads the brand package's `iam` block for JWKS + tenant
+configuration.
 
-Kubeflow is a community-led project maintained by the
-[Kubeflow Working Groups](https://www.kubeflow.org/docs/about/governance/#4-working-groups)
-under the guidance of the [Kubeflow Steering Committee](https://www.kubeflow.org/docs/about/governance/#2-kubeflow-steering-committee-ksc).
+## Role
 
-We encourage you to learn about the [Kubeflow Community](https://www.kubeflow.org/docs/about/community/)
-and how to [contribute](https://www.kubeflow.org/docs/about/contributing/) to the project!
+Read-only reference fork. The Rust operator's `Notebook` CRD reconciler implements per-tenant JupyterLab provisioning gated by the IAM JWT.
+
+The canonical control plane for the ML lifecycle estate is the Rust
+operator at [`hanzoai/operator`](https://github.com/hanzoai/operator).
+See [HIP-0109](https://github.com/hanzoai/HIPs/blob/main/HIPs/hip-0109-hanzo-ml-cloud-toolkit.md)
+for the lifecycle CRD set.
+
+## Upstream sync
+
+This fork stays current with upstream via the GitHub merge-upstream
+API. No upstream code is modified in this fork; only the 5 markdown
+files at root are added.
+
+```bash
+gh api -X POST /repos/hanzo-ml/kubeflow/merge-upstream \
+  -f branch=master
+```
+
+See [UPSTREAM_README.md](./UPSTREAM_README.md) for the original
+project documentation.
+
+## License
+
+Apache-2.0. See [NOTICE](./NOTICE) for attribution.
+
+## See also
+
+- [DESIGN.md](./DESIGN.md) — design system reference (mirrors the brand
+  package's design spec)
+- [BRAND.md](./BRAND.md) — brand package contract and reseller guide
+- [MULTI_TENANT.md](./MULTI_TENANT.md) — tenant isolation contract
+- [HANZO_CHANGES.md](./HANZO_CHANGES.md) — divergence from upstream
+- [HIP-0109 Hanzo ML Cloud Toolkit](https://github.com/hanzoai/HIPs/blob/main/HIPs/hip-0109-hanzo-ml-cloud-toolkit.md)
