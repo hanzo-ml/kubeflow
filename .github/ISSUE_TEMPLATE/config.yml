@@ -20,9 +20,9 @@ contact_links:
     url: https://github.com/kubeflow/katib/issues
     about: Please use the `kubeflow/katib` repository
 
-  - name: Issues - Kubeflow Model Registry
-    url: https://github.com/kubeflow/model-registry/issues
-    about: Please use the `kubeflow/model-registry` repository
+  - name: Issues - Kubeflow Hub (formerly Model Registry)
+    url: https://github.com/kubeflow/hub/issues
+    about: Please use the `kubeflow/hub` repository
 
   - name: Issues - Kubeflow MPI Operator
     url: https://github.com/kubeflow/mpi-operator/issues
@@ -56,6 +56,6 @@ contact_links:
     url: https://github.com/kubeflow/dashboard/issues
     about: Please use the `kubeflow/dashboard` repository
 
-  - name: Issues - Kubeflow Platform - Kubeflow Manifests
-    url: https://github.com/kubeflow/manifests/issues
-    about: Please use the `kubeflow/manifests` repository
+  - name: Issues - Kubeflow Community Distribution
+    url: https://github.com/kubeflow/community-distribution/issues
+    about: Please use the `kubeflow/community-distribution` repository
